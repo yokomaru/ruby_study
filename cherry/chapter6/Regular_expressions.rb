@@ -216,5 +216,131 @@ end
 # iオプションは大文字小文字を区別しない
 'HELLO' =~%r{hello}i
 
+# Regexp::IGNORECASE 定数を渡す
 regexp = Regexp.new('hello',Regexp::IGNORECASE)
 'HELLO' =~ regexp
+
+# mオプションを使うと任意の文字を表すドットが開業文字にもマッチするようになります
+"Hello\nBye" =~ /Hello.Bye/
+
+# mオプションを使うと任意の文字を表すドットが開業文字にもマッチしない
+"Hello\nBye" =~ /Hello.Bye/m
+
+# Regexp::IGNORECASE 定数を渡す
+regexp = Regexp.new('Hello.Bye',Regexp::MULTILINE)
+"Hello\nBye" =~ regexp
+
+#xオプションを使うと空白文字が無視され、＃を使って正規表現中にコメントが書けるようになる
+regexp =/
+  \d{3} #郵便番号先頭３桁
+  -     #釘血文字のハイフン
+  \d{4} #郵便番号後ろ4桁
+/x
+
+'123-1234' =~ regexp
+
+#xオプションを使うと空白文字を正規表現と一部として扱いたい場合ｈバックスラッシュでエスケープ
+regexp =/
+  \d{3} #郵便番号先頭３桁
+  \    #釘血文字のハイフン
+  \d{4} #郵便番号後ろ4桁
+/x
+
+'123 1234' =~ regexp
+
+# Regexp.newを使う場合はRegexp::EXTENDEDという定数を渡す
+# キーがシンボルなら新しいハッシュ記法に変換する
+pattern = <<'TEXT'
+  \d{3} #郵便番号先頭３桁
+  -     #釘血文字のハイフン
+  \d{4} #郵便番号後ろ4桁
+TEXT
+regexp = Regexp.new(pattern, Regexp::EXTENDED)
+'123-1234' =~ regexp
+
+# オプションは同時に使えるよ
+"HELLO\nBYE" =~ /Hello.Bye/im
+
+
+# |で連結
+regexp = Regexp.new('hello.Bye',Regexp::IGNORECASE | Regexp::MULTILINE)
+"HELLO\nBYE" =~ regexp
+
+# 組込変数でマッチの結果を取得
+text = '私の誕生日は1997年7月17日です。'
+# =~やmatchを使うとマッチした結果が組込変数に代入される
+text =~ /(\d+)年(\d+)月(\d+)日/
+# matchdataobjectを取得する
+$~
+$& # マッチした全体を取得する
+
+#irb(main):027:0> text = '私の誕生日は1997年7月17日です。'
+#=> "私の誕生日は1997年7月17日です。"
+#irb(main):028:0> text =~ /(\d+)年(\d+)月(\d+)日/
+#=> 6
+#irb(main):030:0> $~
+#=> #<MatchData "1997年7月17日" 1:"1997" 2:"7" 3:"17">
+
+$1
+$2
+$3
+# irb(main):032:0> $1
+# => "1997"
+# irb(main):033:0> $2
+# => "7"
+# irb(main):034:0> $3
+# => "17"
+
+$+
+# irb(main):035:0> $+
+# => "17"
+
+# 組込変数でマッチの結果を取得
+text = '私の誕生日は1997年7月17日です。'
+# =~やを使うとRegexp.last_match(0)で取得できる
+text =~ /(\d+)年(\d+)月(\d+)日/
+# matchdataobjectを取得する
+Regexp.last_match
+# マッチした部分全体を取得数ｒ
+Regexp.last_match(0)
+
+Regexp.last_match(1)
+Regexp.last_match(2)
+Regexp.last_match(3)
+Regexp.last_match(-1)
+
+# irb(main):037:0> text = '私の誕生日は1997年7月17日です。'
+# => "私の誕生日は1997年7月17日です。"
+# irb(main):038:0> # =~やを使うとRegexp.last_match(0)で取得できる
+# => nil
+# irb(main):039:0> text =~ /(\d+)年(\d+)月(\d+)日/
+# => 6
+# irb(main):040:0> # matchdataobjectを取得する
+# => nil
+# irb(main):041:0> Regexp.last_match
+# => #<MatchData "1997年7月17日" 1:"1997" 2:"7" 3:"17">
+# irb(main):042:0> # マッチした部分全体を取得数ｒ
+# => nil
+# irb(main):043:0> Regexp.last_match(0)
+# => "1997年7月17日"
+# irb(main):044:0>
+# irb(main):045:0> Regexp.last_match(1)
+# => "1997"
+# irb(main):046:0> Regexp.last_match(2)
+# => "7"
+# irb(main):047:0> Regexp.last_match(3)
+# => "17"
+# irb(main):048:0> Regexp.last_match(-1)
+# => "17"
+
+# match?マッチすればtrueを返す
+/\d{3}-\d{4}/.match?('123-4567')
+#irb(main):049:0> /\d{3}-\d{4}/.match?('123-4567')
+#=> true
+
+#マッチしても組込変数やRegexp.last_matchを書き換えない
+$~
+Regesp.last_match
+
+'123-4567'.match?(/\d{3}-\d{4}/)
+
